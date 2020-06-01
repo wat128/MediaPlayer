@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView elapsedTimeLabel;
     private TextView remainingTimeLabel;
     private MediaPlayer mp;
+    private int totalTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,54 @@ public class MainActivity extends AppCompatActivity {
         mp.setLooping(true);
         mp.seekTo(0);
         mp.setVolume(0.5f, 0.5f);
+        totalTime = mp.getDuration();
+
+        // play position
+        positionBar = findViewById(R.id.positionBar);
+        positionBar.setMax(totalTime);
+        positionBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        if(fromUser) {
+                            mp.seekTo(progress);
+                            positionBar.setProgress(progress);
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                }
+        );
+
+        // adjust of volume
+        volumeBar = findViewById(R.id.volumeBar);
+        volumeBar.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        float volumeNum = progress / 100f;
+                        mp.setVolume(volumeNum, volumeNum);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                }
+        );
     }
 
     public void playBtnClick(View view){
