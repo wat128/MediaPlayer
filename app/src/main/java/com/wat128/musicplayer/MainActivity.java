@@ -1,9 +1,12 @@
 package com.wat128.musicplayer;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -81,6 +84,50 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        // Thread (update positionBar and elapsedTimeLabel and remainingTimeLabel)
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(mp != null) {
+                    try {
+                        Message msg = new Message();
+                        msg.what = mp.getCurrentPosition();
+                        handler.sendMessage(msg);
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {}
+                }
+            }
+        }).start();
+    }
+
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message msg) {
+            int currentPosition = msg.what;
+
+            positionBar.setProgress(currentPosition);
+
+            String elapsedTime = createTimeLabel(currentPosition);
+            elapsedTimeLabel.setText(elapsedTime);
+
+            String remainingTime = "- " + createTimeLabel(totalTime - currentPosition);
+            remainingTimeLabel.setText(remainingTime);
+
+            return true;
+        }
+    });
+
+    public String createTimeLabel(int time) {
+        String timeLabel = "";
+        int min = time / 1000 / 60;
+        int sec = time / 1000 % 60;
+
+        timeLabel = min + ":";
+        if(sec < 10) timeLabel += "0";
+        timeLabel += sec;
+
+        return timeLabel;
     }
 
     public void playBtnClick(View view){
